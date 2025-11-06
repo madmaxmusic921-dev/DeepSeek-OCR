@@ -1,0 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Reddit API Credentials - IMPORTANT: Keep these private!
+.env
+reddit_config_local.py
+
+# Downloaded media
+reddit_media/
+*.jpg
+*.png
+*.mp4
+*.gif
+
+# Exported data
+reddit_post_*.json
+*.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Model files (large)
+*.pth
+*.bin
+*.ckpt
+*.safetensors
+
+# DeepSeek OCR specific
+DeepSeek-OCR-master/models/

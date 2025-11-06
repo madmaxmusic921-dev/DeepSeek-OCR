@@ -4,6 +4,14 @@ PyMuPDF
 img2pdf
 einops
 easydict
-addict 
+addict
 Pillow
 numpy
+
+# Reddit API Integration
+praw>=7.7.1
+prawcore>=2.3.0
+
+# Data Processing
+python-dotenv>=1.0.0
+requests>=2.31.0
