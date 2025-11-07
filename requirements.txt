@@ -25,3 +25,10 @@ pydub>=0.25.1  # Audio processing
 # google-cloud-texttospeech>=2.14.0  # Google Cloud TTS (requires API key)
 # boto3>=1.28.0  # Amazon Polly (requires AWS credentials)
 # elevenlabs>=0.2.0  # ElevenLabs (requires API key)
+
+# Video Composition
+moviepy>=1.0.3  # Video editing and composition
+imageio>=2.31.0  # Image/video I/O for moviepy
+imageio-ffmpeg>=0.4.9  # FFmpeg wrapper for moviepy
+proglog>=0.1.10  # Progress logging
+decorator>=4.4.2  # Decorator utilities
