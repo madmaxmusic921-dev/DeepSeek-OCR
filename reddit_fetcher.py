@@ -265,7 +265,6 @@ class RedditFetcher:
 
         # Check for Reddit-hosted images
         if hasattr(submission, "url") and submission.url:
-            parsed = urlparse(submission.url)
             if any(
                 ext in submission.url.lower()
                 for ext in [".jpg", ".jpeg", ".png", ".gif", ".webp"]
