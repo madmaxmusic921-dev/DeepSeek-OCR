@@ -15,6 +15,7 @@ import prawcore
 import os
 import json
 import re
+import html
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 from urllib.parse import urlparse
@@ -88,13 +89,21 @@ class RedditFetcher:
                 client_secret=self.config["client_secret"],
                 user_agent=self.config["user_agent"],
             )
-            # Test connection
-            self.reddit.user.me()
+            # Enable read-only mode for public post fetching
+            self.reddit.read_only = True
+
+            # Test connection with a simple read-only request
+            # This works without user authentication
+            _ = self.reddit.subreddit("python").id
         except prawcore.exceptions.ResponseException as e:
             raise RedditConnectionError(f"Failed to connect to Reddit API: {e}")
+        except prawcore.exceptions.OAuthException as e:
+            raise RedditConnectionError(
+                f"Invalid Reddit API credentials. Please check reddit_config.py: {e}"
+            )
         except Exception as e:
-            # Handle cases where authentication is not required for read-only
-            if "client_id" in str(e) or "401" in str(e):
+            # Handle other authentication errors
+            if "client_id" in str(e) or "401" in str(e) or "403" in str(e):
                 raise RedditConnectionError(
                     f"Invalid Reddit API credentials. Please check reddit_config.py: {e}"
                 )
@@ -299,7 +308,9 @@ class RedditFetcher:
             if hasattr(submission, "media_metadata"):
                 for item_id, item in submission.media_metadata.items():
                     if "s" in item and "u" in item["s"]:
-                        media_info["urls"].append(item["s"]["u"])
+                        # Decode HTML entities in URL (e.g., &amp; -> &)
+                        url = html.unescape(item["s"]["u"])
+                        media_info["urls"].append(url)
 
         # Link posts
         if not submission.is_self and not media_info["has_media"]:
@@ -317,7 +328,11 @@ class RedditFetcher:
         submission.comment_sort = self.options["comment_sort"]
         submission.comments.replace_more(limit=0)  # Remove "load more" comments
 
-        for comment in submission.comments.list()[: self.options["max_comments"]]:
+        # Fetch more comments than needed to account for filtering
+        # This ensures we get max_comments after filtering by score
+        max_fetch = self.options["max_comments"] * 3
+
+        for comment in submission.comments.list()[:max_fetch]:
             if not hasattr(comment, "body"):
                 continue
 
@@ -333,10 +348,14 @@ class RedditFetcher:
                 "created_utc": comment.created_utc,
                 "is_submitter": comment.is_submitter,
                 "distinguished": comment.distinguished,
-                "depth": comment.depth if hasattr(comment, "depth") else 0,
+                # Note: depth removed - comments.list() doesn't preserve tree depth
             }
 
             comments_data.append(comment_data)
+
+            # Stop once we have enough comments
+            if len(comments_data) >= self.options["max_comments"]:
+                break
 
         return comments_data
 
@@ -362,6 +381,9 @@ class RedditFetcher:
         """
         if not text:
             return ""
+
+        # Decode HTML entities (e.g., &amp; -> &, &lt; -> <)
+        text = html.unescape(text)
 
         # Remove excessive newlines
         text = re.sub(r"\n{3,}", "\n\n", text)
