@@ -332,7 +332,9 @@ class RedditFetcher:
         # This ensures we get max_comments after filtering by score
         max_fetch = self.options["max_comments"] * 3
 
-        for comment in submission.comments.list()[:max_fetch]:
+        # Iterate over submission.comments directly to get only top-level comments
+        # Using list() would flatten the tree and include replies
+        for comment in list(submission.comments)[:max_fetch]:
             if not hasattr(comment, "body"):
                 continue
 
